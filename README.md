@@ -1,44 +1,73 @@
-usage: git [-v | --version] [-h | --help] [-C <path>] [-c <name>=<value>]
-           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
-           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]
-           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
-           [--config-env=<name>=<envvar>] <command> [<args>]
+# 💥 Simulador de Desgaste em Concreto Armado
 
-These are common Git commands used in various situations:
+Um website interativo desenvolvido para fins educacionais, onde o usuário pode visualizar um bloco de concreto armado se desgastando com o passar do tempo. A visualização é controlada por um slider, e o bloco pode ser rotacionado com o mouse ou touch, permitindo uma exploração mais intuitiva.
 
-start a working area (see also: git help tutorial)
-   clone     Clone a repository into a new directory
-   init      Create an empty Git repository or reinitialize an existing one
+## 🧱 Funcionalidades
 
-work on the current change (see also: git help everyday)
-   add       Add file contents to the index
-   mv        Move or rename a file, a directory, or a symlink
-   restore   Restore working tree files
-   rm        Remove files from the working tree and from the index
+- Bloco 3D interativo representando concreto armado.
+- Controle de rotação livre com o mouse (Orbit Controls).
+- Slider que simula o desgaste progressivo do material ao longo do tempo.
+- Seção explicativa sobre concreto armado e os impactos da corrosão nas estruturas.
 
-examine the history and state (see also: git help revisions)
-   bisect    Use binary search to find the commit that introduced a bug
-   diff      Show changes between commits, commit and working tree, etc
-   grep      Print lines matching a pattern
-   log       Show commit logs
-   show      Show various types of objects
-   status    Show the working tree status
+## 💠 Tecnologias Utilizadas
 
-grow, mark and tweak your common history
-   branch    List, create, or delete branches
-   commit    Record changes to the repository
-   merge     Join two or more development histories together
-   rebase    Reapply commits on top of another base tip
-   reset     Reset current HEAD to the specified state
-   switch    Switch branches
-   tag       Create, list, delete or verify a tag object signed with GPG
+- [Three.js](https://threejs.org/) – para renderização 3D no navegador.
+- HTML, CSS e JavaScript puro (ou React, se estiver usando).
+- OrbitControls (Three.js addon) – para rotação da câmera com o mouse.
+- Input range (slider) – controle de tempo/desgaste.
 
-collaborate (see also: git help workflows)
-   fetch     Download objects and refs from another repository
-   pull      Fetch from and integrate with another repository or a local branch
-   push      Update remote refs along with associated objects
+## 🚀 Como executar o projeto
 
-'git help -a' and 'git help -g' list available subcommands and some
-concept guides. See 'git help <command>' or 'git help <concept>'
-to read about a specific subcommand or concept.
-See 'git help git' for an overview of the system.
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/snt94/a3-reinforcedConcrete
+   cd a3-reinforcedConcrete
+   ```
+
+2. Instale as dependências (caso use React):
+   ```bash
+   npm install
+   ```
+
+3. Rode o projeto:
+   ```bash
+   npm run dev
+   ```
+
+4. Ou abra o `index.html` diretamente em seu navegador (se for Vanilla JS).
+
+## 📂 Estrutura do Projeto
+
+```
+📁 public/            # Texturas e imagens
+📁 src/               # Arquivos principais
+ ┛ 📄 index.html
+ ┛ 📄 style.css
+ ┛ 📄 main.js         
+```
+
+## 📚 Sobre o projeto
+
+Este projeto foi idealizado como uma forma de demonstrar visualmente os efeitos da corrosão em estruturas de concreto armado, com foco em tornar o conteúdo mais acessível, interativo e compreensível para estudantes e o público geral.
+
+## 🧠 Conceitos Envolvidos
+
+- Concreto armado e corrosão da armadura
+- Interatividade com elementos 3D no navegador
+- Aplicação de texturas e simulação visual de tempo
+
+## 📚 Créditos e Referências
+
+- [Three.js Documentation](https://threejs.org/docs/)
+- [Poly Haven](https://polyhaven.com) – Texturas públicas e gratuitas
+- Textos técnicos baseados em materiais acadêmicos sobre durabilidade do concreto
+
+## 📩 Contato
+
+Se quiser trocar ideias ou sugerir melhorias:
+- ✉️ edu.santos200611@gmail.com
+- 💼 [LinkedIn](https://www.linkedin.com/in/eduardo-luis-de-andrade-santos)
+
+---
+
+> Projeto criado com fins educacionais e de apresentação de trabalho acadêmico.

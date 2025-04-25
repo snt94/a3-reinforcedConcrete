@@ -12,7 +12,7 @@ Um website interativo desenvolvido para fins educacionais, onde o usuário pode 
 ## 💠 Tecnologias Utilizadas
 
 - [Three.js](https://threejs.org/) – para renderização 3D no navegador.
-- HTML, CSS e JavaScript puro (ou React, se estiver usando).
+- HTML, CSS e JavaScript puro.
 - OrbitControls (Three.js addon) – para rotação da câmera com o mouse.
 - Input range (slider) – controle de tempo/desgaste.
 
@@ -24,7 +24,7 @@ Um website interativo desenvolvido para fins educacionais, onde o usuário pode 
    cd a3-reinforcedConcrete
    ```
 
-2. Instale as dependências (caso use React):
+2. Instale as dependências:
    ```bash
    npm install
    ```

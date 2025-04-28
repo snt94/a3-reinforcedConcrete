@@ -34,16 +34,22 @@ Um website interativo desenvolvido para fins educacionais, onde o usuário pode 
    npm run dev
    ```
 
-4. Ou abra o `index.html` diretamente em seu navegador (se for Vanilla JS).
+4. Ou abra o `index.html` diretamente em seu navegador.
 
 ## 📂 Estrutura do Projeto
 
 ```
-📁 public/            # Texturas e imagens
-📁 src/               # Arquivos principais
- ┛ 📄 index.html
- ┛ 📄 style.css
- ┛ 📄 main.js         
+📦 src/
+ ┣ 📂 css/
+ ┃ ┗ 📄 style.css
+ ┣ 📂 js/
+ ┃ ┗ 📄 scripts.js
+ ┗ 📄 index.html
+📦 dist/              # Gerado automaticamente pelo Parcel (build)
+📦 node_modules/      # Dependências instaladas
+📄 package.json
+📄 package-lock.json
+📄 README.md
 ```
 
 ## 📚 Sobre o projeto

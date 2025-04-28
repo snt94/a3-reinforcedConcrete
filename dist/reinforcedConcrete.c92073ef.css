@@ -1,2 +1,48 @@
+body {
+  color: #333;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
 
+section {
+  background-color: #fff;
+  border-radius: 8px;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 40px 20px;
+  box-shadow: 0 2px 8px #0000001a;
+}
+
+section h2 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+}
+
+section p {
+  margin-bottom: 20px;
+  font-size: 1.1em;
+}
+
+section ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+section ul li {
+  margin-bottom: 10px;
+  font-size: 1.05em;
+}
+
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
 /*# sourceMappingURL=reinforcedConcrete.c92073ef.css.map */

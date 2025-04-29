@@ -1,25 +1,47 @@
 body {
-  color: #333;
-  background-color: #f9f9f9;
   margin: 0;
   padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
   line-height: 1.6;
+  transition: background-color .6s, color .6s;
+}
+
+body.light-mode {
+  color: #2e2e2e;
+  background-color: #f4f4f4;
+}
+
+body.dark-mode {
+  color: #e0e0e0;
+  background-color: #1e1e1e;
 }
 
 section {
   background-color: #fff;
-  border-radius: 8px;
+  border-left: 8px solid #f39c12;
+  border-radius: 4px;
   max-width: 1000px;
   margin: 20px auto;
   padding: 40px 20px;
-  box-shadow: 0 2px 8px #0000001a;
+  transition: background-color .6s, box-shadow .6s;
+  box-shadow: 0 2px 10px #0000001a;
+}
+
+body.dark-mode section {
+  background-color: #2c2c2c;
+  border-left: 8px solid #e67e22;
+  box-shadow: 0 2px 10px #0006;
 }
 
 section h2 {
-  color: #2c3e50;
+  color: #c0392b;
   margin-bottom: 15px;
-  font-size: 1.8em;
+  font-size: 1.9em;
+  transition: color .6s;
+}
+
+body.dark-mode section h2 {
+  color: #e74c3c;
 }
 
 section p {
@@ -28,8 +50,8 @@ section p {
 }
 
 section ul {
-  padding-left: 20px;
-  list-style-type: disc;
+  padding-left: 25px;
+  list-style-type: square;
 }
 
 section ul li {
@@ -38,11 +60,38 @@ section ul li {
 }
 
 a {
-  color: #3498db;
+  color: #f39c12;
   text-decoration: none;
+  transition: color .6s;
 }
 
 a:hover {
   text-decoration: underline;
+}
+
+.toggle-theme-btn {
+  cursor: pointer;
+  color: #fff;
+  z-index: 1000;
+  background-color: #f39c12;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
+  font-weight: bold;
+  transition: background-color .6s;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+
+body.dark-mode .toggle-theme-btn {
+  background-color: #e67e22;
+}
+
+@media (width <= 600px) {
+  section {
+    padding: 30px 15px;
+  }
 }
 /*# sourceMappingURL=reinforcedConcrete.c92073ef.css.map */

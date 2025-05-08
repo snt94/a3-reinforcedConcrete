@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/snt94/a3-reinforcedConcrete#readme",
   "dependencies": {
-    "three": "^0.176.0"
+    "three": "^0.176.0",
+    "parcel": "?"
   }
 }

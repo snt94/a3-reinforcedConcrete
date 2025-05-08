@@ -130,7 +130,7 @@
 
   // Only insert newRequire.load when it is actually used.
   // The code in this file is linted against ES5, so dynamic import is not allowed.
-  // INSERT_LOAD_HERE
+  function $parcel$resolve(url) {  url = importMap[url] || url;  return import.meta.resolve(distDir + url);}newRequire.resolve = $parcel$resolve;
 
   Object.defineProperty(newRequire, 'root', {
     get: function () {
@@ -674,23 +674,60 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const scene = new _three.Scene();
 const camera = new _three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+// Eixos para referência
 const axesHelper = new _three.AxesHelper(5);
-renderer.render(scene, camera);
-//Função de animação
+scene.add(axesHelper);
+// Luz (necessária se usar materiais com iluminação)
+const light = new _three.DirectionalLight(0xffffff, 1);
+light.position.set(5, 5, 5);
+scene.add(light);
+// Carrega a textura
+const textureLoader = new _three.TextureLoader();
+// const concreteTexture = textureLoader.load(concreteTextureImg);
+const concreteTextureImg = new URL(require("1db1a8c7af0847f9")).href;
+const concreteTexture = textureLoader.load(concreteTextureImg);
+// Material com textura e cor moduladora
+const material = new _three.MeshBasicMaterial({
+    map: concreteTexture
+});
+// Geometria
+const geometry = new _three.BoxGeometry(1, 1, 1);
+const cube = new _three.Mesh(geometry, material);
+scene.add(cube);
+camera.position.z = 5;
+// Função de animação
 function animate() {
     renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-//Criação de um objeto
-const geometry = new _three.BoxGeometry(1, 1, 1);
-const material = new _three.MeshBasicMaterial({
-    color: 0xFF4444
+// Slider de desgaste do concreto
+const slider = document.getElementById('damageSlider');
+slider.addEventListener('input', ()=>{
+    const value = slider.value;
+    const darkness = 1 - value / 100;
+    cube.material.color.setRGB(darkness, 0.27 * darkness, 0.27 * darkness);
 });
-const cube = new _three.Mesh(geometry, material);
-scene.add(cube);
-camera.position.z = 5;
+//Textura de rachaduras na estrutura
+const crackTextureImg = new URL(require("d5043c59e30e23ed")).href;
+const crackTexture = textureLoader.load(crackTextureImg);
+material.alphaMap = crackTexture;
+material.transparent = true;
+// Criar cilindros representando a armadura
+const armatureMaterial = new _three.MeshStandardMaterial({
+    color: 0x808080
+});
+const armature = new _three.Mesh(new _three.CylinderGeometry(0.05, 0.05, 1), armatureMaterial);
+armature.position.set(0, 0, 0);
+scene.add(armature);
+// Atualizar a cor com base no slider
+slider.addEventListener('input', ()=>{
+    const value = slider.value;
+    const rustIntensity = value / 100;
+    const rustColor = new _three.Color().lerpColors(new _three.Color(0x808080), new _three.Color(0x8B0000), rustIntensity);
+    armature.material.color = rustColor;
+});
 
-},{"three":"dsoTF"}],"dsoTF":[function(require,module,exports,__globalThis) {
+},{"three":"dsoTF","1db1a8c7af0847f9":"c8RfO","d5043c59e30e23ed":"2qlAp"}],"dsoTF":[function(require,module,exports,__globalThis) {
 /**
  * @license
  * Copyright 2010-2025 Three.js Authors
@@ -50931,6 +50968,12 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["kmEV5","dnnhU"], "dnnhU", "parcelRequireacdf", {})
+},{}],"c8RfO":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("concreto_textura.42d51426.jpg") + "?" + Date.now();
+
+},{}],"2qlAp":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("rachaduras.9dc01944.jpg") + "?" + Date.now();
+
+},{}]},["kmEV5","dnnhU"], "dnnhU", "parcelRequireacdf", {}, "./", "/")
 
 //# sourceMappingURL=reinforcedConcrete.18dafa73.js.map

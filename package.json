@@ -2,7 +2,6 @@
   "name": "reinforcedconcrete",
   "version": "1.0.0",
   "description": "Projeto acadêmico correspondente a última avaliação do primeiro semestre do curso de Engenharia da Computação na Universidade São Judas Tadeu.",
-  
   "scripts": {
     "test": "teste"
   },
@@ -17,7 +16,8 @@
   },
   "homepage": "https://github.com/snt94/a3-reinforcedConcrete#readme",
   "dependencies": {
+    "parcel": "2.14.4",
     "three": "^0.176.0",
-    "parcel": "?"
+  "three-csg-ts": "^3.2.0"
   }
 }

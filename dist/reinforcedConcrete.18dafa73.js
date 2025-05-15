@@ -160,7 +160,7 @@
       });
     }
   }
-})({"kmEV5":[function(require,module,exports,__globalThis) {
+})({"ktU33":[function(require,module,exports,__globalThis) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
@@ -669,11 +669,10 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 },{}],"dnnhU":[function(require,module,exports,__globalThis) {
 var _three = require("three");
 var _orbitControls = require("three/examples/jsm/controls/OrbitControls");
-// Renderizador
+var _threeCsgTs = require("three-csg-ts");
 const renderer = new _three.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-// Cena, câmera e controle
 const scene = new _three.Scene();
 const camera = new _three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const controls = new (0, _orbitControls.OrbitControls)(camera, renderer.domElement);
@@ -683,29 +682,39 @@ controls.minPolarAngle = Math.PI / 4;
 controls.maxPolarAngle = Math.PI / 2;
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-// Luz
 const light = new _three.DirectionalLight(0xffffff, 1);
 light.position.set(5, 5, 5);
 scene.add(light);
-// Textura e material do bloco de concreto
 const textureLoader = new _three.TextureLoader();
 const concreteTextureImg = new URL(require("1db1a8c7af0847f9")).href;
 const concreteTexture = textureLoader.load(concreteTextureImg);
-let isWireframe = false; // Evita o erro
-// Material com textura de concreto
+let isWireframe = false;
 const material = new _three.MeshBasicMaterial({
     map: concreteTexture,
-    color: 0xffffff // Mantém textura visível nas 6 faces
+    color: 0xffffff
 });
-const geometry = new _three.BoxGeometry(2, 1, 1);
-const cube = new _three.Mesh(geometry, material);
-scene.add(cube);
-// Salva a cor original do bloco (para reset)
-const originalColor = new _three.Color().copy(cube.material.color);
-// Posicionamento da câmera
-controls.target.copy(cube.position);
+const concreteGeometry = new _three.BoxGeometry(2, 1, 1);
+const concreteMesh = new _three.Mesh(concreteGeometry, material);
+const holeGeometry = new _three.CylinderGeometry(0.1, 0.1, 1.2, 32);
+const hole1 = new _three.Mesh(holeGeometry);
+hole1.position.set(-0.7, 0, -0.4);
+hole1.rotation.z = Math.PI / 2;
+const hole2 = hole1.clone();
+hole2.position.z = 0.4;
+const hole3 = hole1.clone();
+hole3.position.x = 0.7;
+hole3.position.z = -0.4;
+const hole4 = hole1.clone();
+hole4.position.z = 0.4;
+let resultMesh = (0, _threeCsgTs.CSG).subtract(concreteMesh, hole1);
+resultMesh = (0, _threeCsgTs.CSG).subtract(resultMesh, hole2);
+resultMesh = (0, _threeCsgTs.CSG).subtract(resultMesh, hole3);
+resultMesh = (0, _threeCsgTs.CSG).subtract(resultMesh, hole4);
+scene.add(resultMesh);
+resultMesh.material = material;
+const originalColor = new _three.Color().copy(resultMesh.material.color);
+controls.target.copy(resultMesh.position);
 camera.position.z = 5;
-// Armaduras internas (4 barras)
 const armatureMaterial = new _three.MeshStandardMaterial({
     color: 0x808080
 });
@@ -739,9 +748,8 @@ armaturePositions.forEach(([x, y, z])=>{
 });
 armatureGroup.visible = false;
 scene.add(armatureGroup);
-// Grupo para os estribos (anéis)
 const stirrupGroup = new _three.Group();
-const stirrupCount = 6; // número de estribos ao longo do eixo Y
+const stirrupCount = 6;
 const stirrupWidth = 1.4;
 const stirrupHeight = 0.8;
 const stirrupDepth = 0.6;
@@ -749,7 +757,7 @@ const stirrupMaterial = new _three.LineBasicMaterial({
     color: 0x303030
 });
 for(let i = 0; i < stirrupCount; i++){
-    const y = -0.45 + i / (stirrupCount - 1) * 0.9; // distribuído de -0.45 a +0.45 (altura do bloco)
+    const y = -0.45 + i / (stirrupCount - 1) * 0.9;
     const stirrupShape = new _three.BufferGeometry().setFromPoints([
         new _three.Vector3(-stirrupWidth / 2, y, -stirrupDepth / 2),
         new _three.Vector3(stirrupWidth / 2, y, -stirrupDepth / 2),
@@ -759,48 +767,56 @@ for(let i = 0; i < stirrupCount; i++){
     const stirrupLine = new _three.LineLoop(stirrupShape, stirrupMaterial);
     stirrupGroup.add(stirrupLine);
 }
-stirrupGroup.visible = false; // só aparece junto da estrutura
+stirrupGroup.visible = false;
 scene.add(stirrupGroup);
-// Animação
 function animate() {
     controls.target.set(0, 0, 0);
     controls.update();
     renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
-// Interações UI
 const slider = document.getElementById('damageSlider');
+const rustSlider = document.getElementById('rustSlider');
+const carbonSlider = document.getElementById('carbonSlider');
 const toggleBtn = document.getElementById('toggleStructure');
 const resetBtn = document.getElementById('resetVisuals');
 slider.addEventListener('input', ()=>{
     const value = slider.value;
     const rustIntensity = value / 100;
-    // Aplicar escurecimento no concreto: reduz o RGB de 1 até 0.27
     const darkness = 1 - rustIntensity;
-    cube.material.color.setRGB(1 * darkness, 1 * darkness, 1 * darkness);
-    // Atualiza todas as barras com ferrugem
+    resultMesh.material.color.setRGB(1 * darkness, 1 * darkness, 1 * darkness);
     armatureGroup.children.forEach((bar)=>{
         const rustColor = new _three.Color().lerpColors(new _three.Color(0x808080), new _three.Color(0x8B0000), rustIntensity);
         bar.material.color = rustColor;
     });
 });
+rustSlider.addEventListener('input', ()=>{
+    const intensity = rustSlider.value / 100;
+    armatureGroup.children.forEach((bar)=>{
+        const rustColor = new _three.Color().lerpColors(new _three.Color(0x808080), new _three.Color(0x8B0000), intensity);
+        bar.material.color = rustColor;
+    });
+});
+carbonSlider.addEventListener('input', ()=>{
+    const intensity = carbonSlider.value / 100;
+    const lightening = 1 - 0.5 * intensity;
+    resultMesh.material.color.setRGB(1 * lightening, 1 * lightening, 1 * lightening);
+});
 toggleBtn.addEventListener('click', ()=>{
     isWireframe = !isWireframe;
-    cube.material.wireframe = isWireframe;
+    resultMesh.material.wireframe = isWireframe;
     armatureGroup.visible = isWireframe;
     stirrupGroup.visible = isWireframe;
 });
 resetBtn.addEventListener('click', ()=>{
-    // Restaura cor original do bloco
-    cube.material.color.copy(originalColor);
-    // Restaura cor das barras
+    resultMesh.material.color.copy(originalColor);
     armatureGroup.children.forEach((bar)=>{
         bar.material.color.set(0x808080);
     });
     slider.value = 0;
 });
 
-},{"three":"dsoTF","1db1a8c7af0847f9":"c8RfO","three/examples/jsm/controls/OrbitControls":"45ipX"}],"dsoTF":[function(require,module,exports,__globalThis) {
+},{"three":"dsoTF","three/examples/jsm/controls/OrbitControls":"45ipX","1db1a8c7af0847f9":"4dkQn","three-csg-ts":"2ysUh"}],"dsoTF":[function(require,module,exports,__globalThis) {
 /**
  * @license
  * Copyright 2010-2025 Three.js Authors
@@ -11667,7 +11683,7 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
     }
 }
 
-},{"./three.core.js":"4TvK1","@parcel/transformer-js/src/esmodule-helpers.js":"9blKR"}],"4TvK1":[function(require,module,exports,__globalThis) {
+},{"./three.core.js":"4TvK1","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"4TvK1":[function(require,module,exports,__globalThis) {
 /**
  * @license
  * Copyright 2010-2025 Three.js Authors
@@ -51011,7 +51027,7 @@ if (typeof window !== 'undefined') {
     else window.__THREE__ = REVISION;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"9blKR"}],"9blKR":[function(require,module,exports,__globalThis) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"jnFvT":[function(require,module,exports,__globalThis) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -51040,9 +51056,6 @@ exports.export = function(dest, destName, get) {
         get: get
     });
 };
-
-},{}],"c8RfO":[function(require,module,exports,__globalThis) {
-module.exports = module.bundle.resolve("concreto_textura.42d51426.jpg") + "?" + Date.now();
 
 },{}],"45ipX":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -52124,6 +52137,573 @@ function interceptControlUp(event) {
     }
 }
 
-},{"three":"dsoTF","@parcel/transformer-js/src/esmodule-helpers.js":"9blKR"}]},["kmEV5","dnnhU"], "dnnhU", "parcelRequireacdf", {}, "./", "/")
+},{"three":"dsoTF","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"4dkQn":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("concreto_textura.42d51426.jpg") + "?" + Date.now();
+
+},{}],"2ysUh":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _csg = require("./CSG");
+parcelHelpers.exportAll(_csg, exports);
+
+},{"./CSG":"l9kg5","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"l9kg5":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+/**
+ * Holds a binary space partition tree representing a 3D solid. Two solids can
+ * be combined using the `union()`, `subtract()`, and `intersect()` methods.
+ */ parcelHelpers.export(exports, "CSG", ()=>CSG);
+var _three = require("three");
+var _nbuf = require("./NBuf");
+var _node = require("./Node");
+var _polygon = require("./Polygon");
+var _vector = require("./Vector");
+var _vertex = require("./Vertex");
+class CSG {
+    constructor(){
+        this.polygons = [];
+    }
+    static fromPolygons(polygons) {
+        const csg = new CSG();
+        csg.polygons = polygons;
+        return csg;
+    }
+    static fromGeometry(geom, objectIndex) {
+        let polys = [];
+        const posattr = geom.attributes.position;
+        const normalattr = geom.attributes.normal;
+        const uvattr = geom.attributes.uv;
+        const colorattr = geom.attributes.color;
+        const grps = geom.groups;
+        let index;
+        if (geom.index) index = geom.index.array;
+        else {
+            index = new Uint16Array(posattr.array.length / posattr.itemSize | 0);
+            for(let i = 0; i < index.length; i++)index[i] = i;
+        }
+        const triCount = index.length / 3 | 0;
+        polys = new Array(triCount);
+        for(let i = 0, pli = 0, l = index.length; i < l; i += 3, pli++){
+            const vertices = new Array(3);
+            for(let j = 0; j < 3; j++){
+                const vi = index[i + j];
+                const vp = vi * 3;
+                const vt = vi * 2;
+                const x = posattr.array[vp];
+                const y = posattr.array[vp + 1];
+                const z = posattr.array[vp + 2];
+                const nx = normalattr.array[vp];
+                const ny = normalattr.array[vp + 1];
+                const nz = normalattr.array[vp + 2];
+                const u = uvattr === null || uvattr === void 0 ? void 0 : uvattr.array[vt];
+                const v = uvattr === null || uvattr === void 0 ? void 0 : uvattr.array[vt + 1];
+                vertices[j] = new (0, _vertex.Vertex)(new (0, _vector.Vector)(x, y, z), new (0, _vector.Vector)(nx, ny, nz), new (0, _vector.Vector)(u, v, 0), colorattr && new (0, _vector.Vector)(colorattr.array[vp], colorattr.array[vp + 1], colorattr.array[vp + 2]));
+            }
+            if (objectIndex === undefined && grps && grps.length > 0) {
+                for (const grp of grps)if (i >= grp.start && i < grp.start + grp.count) polys[pli] = new (0, _polygon.Polygon)(vertices, grp.materialIndex);
+            } else polys[pli] = new (0, _polygon.Polygon)(vertices, objectIndex);
+        }
+        return CSG.fromPolygons(polys.filter((p)=>!Number.isNaN(p.plane.normal.x)));
+    }
+    static toGeometry(csg, toMatrix) {
+        let triCount = 0;
+        const ps = csg.polygons;
+        for (const p of ps)triCount += p.vertices.length - 2;
+        const geom = new (0, _three.BufferGeometry)();
+        const vertices = new (0, _nbuf.NBuf3)(triCount * 9);
+        const normals = new (0, _nbuf.NBuf3)(triCount * 9);
+        const uvs = new (0, _nbuf.NBuf2)(triCount * 6);
+        let colors;
+        const grps = [];
+        const dgrp = [];
+        for (const p of ps){
+            const pvs = p.vertices;
+            const pvlen = pvs.length;
+            if (p.shared !== undefined) {
+                if (!grps[p.shared]) grps[p.shared] = [];
+            }
+            if (pvlen && pvs[0].color !== undefined) {
+                if (!colors) colors = new (0, _nbuf.NBuf3)(triCount * 9);
+            }
+            for(let j = 3; j <= pvlen; j++){
+                const grp = p.shared === undefined ? dgrp : grps[p.shared];
+                grp.push(vertices.top / 3, vertices.top / 3 + 1, vertices.top / 3 + 2);
+                vertices.write(pvs[0].pos);
+                vertices.write(pvs[j - 2].pos);
+                vertices.write(pvs[j - 1].pos);
+                normals.write(pvs[0].normal);
+                normals.write(pvs[j - 2].normal);
+                normals.write(pvs[j - 1].normal);
+                if (uvs) {
+                    uvs.write(pvs[0].uv);
+                    uvs.write(pvs[j - 2].uv);
+                    uvs.write(pvs[j - 1].uv);
+                }
+                if (colors) {
+                    colors.write(pvs[0].color);
+                    colors.write(pvs[j - 2].color);
+                    colors.write(pvs[j - 1].color);
+                }
+            }
+        }
+        geom.setAttribute('position', new (0, _three.BufferAttribute)(vertices.array, 3));
+        geom.setAttribute('normal', new (0, _three.BufferAttribute)(normals.array, 3));
+        uvs && geom.setAttribute('uv', new (0, _three.BufferAttribute)(uvs.array, 2));
+        colors && geom.setAttribute('color', new (0, _three.BufferAttribute)(colors.array, 3));
+        for(let gi = 0; gi < grps.length; gi++)if (grps[gi] === undefined) grps[gi] = [];
+        if (grps.length) {
+            let index = [];
+            let gbase = 0;
+            for(let gi = 0; gi < grps.length; gi++){
+                geom.addGroup(gbase, grps[gi].length, gi);
+                gbase += grps[gi].length;
+                index = index.concat(grps[gi]);
+            }
+            geom.addGroup(gbase, dgrp.length, grps.length);
+            index = index.concat(dgrp);
+            geom.setIndex(index);
+        }
+        const inv = new (0, _three.Matrix4)().copy(toMatrix).invert();
+        geom.applyMatrix4(inv);
+        geom.computeBoundingSphere();
+        geom.computeBoundingBox();
+        return geom;
+    }
+    static fromMesh(mesh, objectIndex) {
+        const csg = CSG.fromGeometry(mesh.geometry, objectIndex);
+        const ttvv0 = new (0, _three.Vector3)();
+        const tmpm3 = new (0, _three.Matrix3)();
+        tmpm3.getNormalMatrix(mesh.matrix);
+        for(let i = 0; i < csg.polygons.length; i++){
+            const p = csg.polygons[i];
+            for(let j = 0; j < p.vertices.length; j++){
+                const v = p.vertices[j];
+                v.pos.copy(ttvv0.copy(v.pos.toVector3()).applyMatrix4(mesh.matrix));
+                v.normal.copy(ttvv0.copy(v.normal.toVector3()).applyMatrix3(tmpm3));
+            }
+        }
+        return csg;
+    }
+    static toMesh(csg, toMatrix, toMaterial) {
+        const geom = CSG.toGeometry(csg, toMatrix);
+        const m = new (0, _three.Mesh)(geom, toMaterial);
+        m.matrix.copy(toMatrix);
+        m.matrix.decompose(m.position, m.quaternion, m.scale);
+        m.rotation.setFromQuaternion(m.quaternion);
+        m.updateMatrixWorld();
+        m.castShadow = m.receiveShadow = true;
+        return m;
+    }
+    static union(meshA, meshB) {
+        const csgA = CSG.fromMesh(meshA);
+        const csgB = CSG.fromMesh(meshB);
+        return CSG.toMesh(csgA.union(csgB), meshA.matrix, meshA.material);
+    }
+    static subtract(meshA, meshB) {
+        const csgA = CSG.fromMesh(meshA);
+        const csgB = CSG.fromMesh(meshB);
+        return CSG.toMesh(csgA.subtract(csgB), meshA.matrix, meshA.material);
+    }
+    static intersect(meshA, meshB) {
+        const csgA = CSG.fromMesh(meshA);
+        const csgB = CSG.fromMesh(meshB);
+        return CSG.toMesh(csgA.intersect(csgB), meshA.matrix, meshA.material);
+    }
+    clone() {
+        const csg = new CSG();
+        csg.polygons = this.polygons.map((p)=>p.clone()).filter((p)=>Number.isFinite(p.plane.w));
+        return csg;
+    }
+    toPolygons() {
+        return this.polygons;
+    }
+    union(csg) {
+        const a = new (0, _node.Node)(this.clone().polygons);
+        const b = new (0, _node.Node)(csg.clone().polygons);
+        a.clipTo(b);
+        b.clipTo(a);
+        b.invert();
+        b.clipTo(a);
+        b.invert();
+        a.build(b.allPolygons());
+        return CSG.fromPolygons(a.allPolygons());
+    }
+    subtract(csg) {
+        const a = new (0, _node.Node)(this.clone().polygons);
+        const b = new (0, _node.Node)(csg.clone().polygons);
+        a.invert();
+        a.clipTo(b);
+        b.clipTo(a);
+        b.invert();
+        b.clipTo(a);
+        b.invert();
+        a.build(b.allPolygons());
+        a.invert();
+        return CSG.fromPolygons(a.allPolygons());
+    }
+    intersect(csg) {
+        const a = new (0, _node.Node)(this.clone().polygons);
+        const b = new (0, _node.Node)(csg.clone().polygons);
+        a.invert();
+        b.clipTo(a);
+        b.invert();
+        a.clipTo(b);
+        b.clipTo(a);
+        a.build(b.allPolygons());
+        a.invert();
+        return CSG.fromPolygons(a.allPolygons());
+    }
+    // Return a new CSG solid with solid and empty space switched. This solid is
+    // not modified.
+    inverse() {
+        const csg = this.clone();
+        for (const p of csg.polygons)p.flip();
+        return csg;
+    }
+    toMesh(toMatrix, toMaterial) {
+        return CSG.toMesh(this, toMatrix, toMaterial);
+    }
+    toGeometry(toMatrix) {
+        return CSG.toGeometry(this, toMatrix);
+    }
+}
+
+},{"three":"dsoTF","./NBuf":"fLAQf","./Node":"fdF7X","./Polygon":"jdVul","./Vector":"405kh","./Vertex":"e0N2R","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"fLAQf":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "NBuf3", ()=>NBuf3);
+parcelHelpers.export(exports, "NBuf2", ()=>NBuf2);
+class NBuf3 {
+    constructor(ct){
+        this.top = 0;
+        this.array = new Float32Array(ct);
+    }
+    write(v) {
+        this.array[this.top++] = v.x;
+        this.array[this.top++] = v.y;
+        this.array[this.top++] = v.z;
+    }
+}
+class NBuf2 {
+    constructor(ct){
+        this.top = 0;
+        this.array = new Float32Array(ct);
+    }
+    write(v) {
+        this.array[this.top++] = v.x;
+        this.array[this.top++] = v.y;
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"fdF7X":[function(require,module,exports,__globalThis) {
+/**
+ * Holds a node in a BSP tree. A BSP tree is built from a collection of polygons
+ * by picking a polygon to split along. That polygon (and all other coplanar
+ * polygons) are added directly to that node and the other polygons are added to
+ * the front and/or back subtrees. This is not a leafy BSP tree since there is
+ * no distinction between internal and leaf nodes.
+ */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Node", ()=>Node);
+class Node {
+    constructor(polygons){
+        this.plane = null;
+        this.front = null;
+        this.back = null;
+        this.polygons = [];
+        if (polygons) this.build(polygons);
+    }
+    clone() {
+        const node = new Node();
+        node.plane = this.plane && this.plane.clone();
+        node.front = this.front && this.front.clone();
+        node.back = this.back && this.back.clone();
+        node.polygons = this.polygons.map((p)=>p.clone());
+        return node;
+    }
+    // Convert solid space to empty space and empty space to solid space.
+    invert() {
+        for(let i = 0; i < this.polygons.length; i++)this.polygons[i].flip();
+        this.plane && this.plane.flip();
+        this.front && this.front.invert();
+        this.back && this.back.invert();
+        const temp = this.front;
+        this.front = this.back;
+        this.back = temp;
+    }
+    // Recursively remove all polygons in `polygons` that are inside this BSP
+    // tree.
+    clipPolygons(polygons) {
+        if (!this.plane) return polygons.slice();
+        let front = new Array(), back = new Array();
+        for(let i = 0; i < polygons.length; i++)this.plane.splitPolygon(polygons[i], front, back, front, back);
+        if (this.front) front = this.front.clipPolygons(front);
+        this.back ? back = this.back.clipPolygons(back) : back = [];
+        return front.concat(back);
+    }
+    // Remove all polygons in this BSP tree that are inside the other BSP tree
+    // `bsp`.
+    clipTo(bsp) {
+        this.polygons = bsp.clipPolygons(this.polygons);
+        if (this.front) this.front.clipTo(bsp);
+        if (this.back) this.back.clipTo(bsp);
+    }
+    // Return a list of all polygons in this BSP tree.
+    allPolygons() {
+        let polygons = this.polygons.slice();
+        if (this.front) polygons = polygons.concat(this.front.allPolygons());
+        if (this.back) polygons = polygons.concat(this.back.allPolygons());
+        return polygons;
+    }
+    // Build a BSP tree out of `polygons`. When called on an existing tree, the
+    // new polygons are filtered down to the bottom of the tree and become new
+    // nodes there. Each set of polygons is partitioned using the first polygon
+    // (no heuristic is used to pick a good split).
+    build(polygons) {
+        if (!polygons.length) return;
+        if (!this.plane) this.plane = polygons[0].plane.clone();
+        const front = [], back = [];
+        for(let i = 0; i < polygons.length; i++)this.plane.splitPolygon(polygons[i], this.polygons, this.polygons, front, back);
+        if (front.length) {
+            if (!this.front) this.front = new Node();
+            this.front.build(front);
+        }
+        if (back.length) {
+            if (!this.back) this.back = new Node();
+            this.back.build(back);
+        }
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"jdVul":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+/**
+ * Represents a convex polygon. The vertices used to initialize a polygon must
+ * be coplanar and form a convex loop. They do not have to be `Vertex`
+ * instances but they must behave similarly (duck typing can be used for
+ * customization).
+ *
+ * Each convex polygon has a `shared` property, which is shared between all
+ * polygons that are clones of each other or were split from the same polygon.
+ * This can be used to define per-polygon properties (such as surface color).
+ */ parcelHelpers.export(exports, "Polygon", ()=>Polygon);
+var _plane = require("./Plane");
+class Polygon {
+    constructor(vertices, shared){
+        this.vertices = vertices;
+        this.shared = shared;
+        this.plane = (0, _plane.Plane).fromPoints(vertices[0].pos, vertices[1].pos, vertices[2].pos);
+    }
+    clone() {
+        return new Polygon(this.vertices.map((v)=>v.clone()), this.shared);
+    }
+    flip() {
+        this.vertices.reverse().map((v)=>v.flip());
+        this.plane.flip();
+    }
+}
+
+},{"./Plane":"cMzKI","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"cMzKI":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+/**
+ * Represents a plane in 3D space.
+ */ parcelHelpers.export(exports, "Plane", ()=>Plane);
+var _polygon = require("./Polygon");
+var _vector = require("./Vector");
+class Plane {
+    constructor(normal, w){
+        this.normal = normal;
+        this.w = w;
+        this.normal = normal;
+        this.w = w;
+    }
+    clone() {
+        return new Plane(this.normal.clone(), this.w);
+    }
+    flip() {
+        this.normal.negate();
+        this.w = -this.w;
+    }
+    // Split `polygon` by this plane if needed, then put the polygon or polygon
+    // fragments in the appropriate lists. Coplanar polygons go into either
+    // `coplanarFront` or `coplanarBack` depending on their orientation with
+    // respect to this plane. Polygons in front or in back of this plane go into
+    // either `front` or `back`.
+    splitPolygon(polygon, coplanarFront, coplanarBack, front, back) {
+        const COPLANAR = 0;
+        const FRONT = 1;
+        const BACK = 2;
+        const SPANNING = 3;
+        // Classify each point as well as the entire polygon into one of the above
+        // four classes.
+        let polygonType = 0;
+        const types = [];
+        for(let i = 0; i < polygon.vertices.length; i++){
+            const t = this.normal.dot(polygon.vertices[i].pos) - this.w;
+            const type = t < -Plane.EPSILON ? BACK : t > Plane.EPSILON ? FRONT : COPLANAR;
+            polygonType |= type;
+            types.push(type);
+        }
+        // Put the polygon in the correct list, splitting it when necessary.
+        switch(polygonType){
+            case COPLANAR:
+                (this.normal.dot(polygon.plane.normal) > 0 ? coplanarFront : coplanarBack).push(polygon);
+                break;
+            case FRONT:
+                front.push(polygon);
+                break;
+            case BACK:
+                back.push(polygon);
+                break;
+            case SPANNING:
+                {
+                    const f = [], b = [];
+                    for(let i = 0; i < polygon.vertices.length; i++){
+                        const j = (i + 1) % polygon.vertices.length;
+                        const ti = types[i], tj = types[j];
+                        const vi = polygon.vertices[i], vj = polygon.vertices[j];
+                        if (ti != BACK) f.push(vi);
+                        if (ti != FRONT) b.push(ti != BACK ? vi.clone() : vi);
+                        if ((ti | tj) == SPANNING) {
+                            const t = (this.w - this.normal.dot(vi.pos)) / this.normal.dot(new (0, _vector.Vector)().copy(vj.pos).sub(vi.pos));
+                            const v = vi.interpolate(vj, t);
+                            f.push(v);
+                            b.push(v.clone());
+                        }
+                    }
+                    if (f.length >= 3) front.push(new (0, _polygon.Polygon)(f, polygon.shared));
+                    if (b.length >= 3) back.push(new (0, _polygon.Polygon)(b, polygon.shared));
+                    break;
+                }
+        }
+    }
+    static fromPoints(a, b, c) {
+        const n = new (0, _vector.Vector)().copy(b).sub(a).cross(new (0, _vector.Vector)().copy(c).sub(a)).normalize();
+        return new Plane(n.clone(), n.dot(a));
+    }
+}
+Plane.EPSILON = 1e-5;
+
+},{"./Polygon":"jdVul","./Vector":"405kh","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"405kh":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+/**
+ * Represents a 3D vector.
+ */ parcelHelpers.export(exports, "Vector", ()=>Vector);
+var _three = require("three");
+class Vector {
+    constructor(x = 0, y = 0, z = 0){
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+    copy(v) {
+        this.x = v.x;
+        this.y = v.y;
+        this.z = v.z;
+        return this;
+    }
+    clone() {
+        return new Vector(this.x, this.y, this.z);
+    }
+    negate() {
+        this.x *= -1;
+        this.y *= -1;
+        this.z *= -1;
+        return this;
+    }
+    add(a) {
+        this.x += a.x;
+        this.y += a.y;
+        this.z += a.z;
+        return this;
+    }
+    sub(a) {
+        this.x -= a.x;
+        this.y -= a.y;
+        this.z -= a.z;
+        return this;
+    }
+    times(a) {
+        this.x *= a;
+        this.y *= a;
+        this.z *= a;
+        return this;
+    }
+    dividedBy(a) {
+        this.x /= a;
+        this.y /= a;
+        this.z /= a;
+        return this;
+    }
+    lerp(a, t) {
+        return this.add(new Vector().copy(a).sub(this).times(t));
+    }
+    unit() {
+        return this.dividedBy(this.length());
+    }
+    length() {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    }
+    normalize() {
+        return this.unit();
+    }
+    cross(b) {
+        const a = this.clone();
+        const ax = a.x, ay = a.y, az = a.z;
+        const bx = b.x, by = b.y, bz = b.z;
+        this.x = ay * bz - az * by;
+        this.y = az * bx - ax * bz;
+        this.z = ax * by - ay * bx;
+        return this;
+    }
+    dot(b) {
+        return this.x * b.x + this.y * b.y + this.z * b.z;
+    }
+    toVector3() {
+        return new (0, _three.Vector3)(this.x, this.y, this.z);
+    }
+}
+
+},{"three":"dsoTF","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"e0N2R":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+/**
+ * Represents a vertex of a polygon. Use your own vertex class instead of this
+ * one to provide additional features like texture coordinates and vertex
+ * colors. Custom vertex classes need to provide a `pos` property and `clone()`,
+ * `flip()`, and `interpolate()` methods that behave analogous to the ones
+ * defined by `CSG.Vertex`. This class provides `normal` so convenience
+ * functions like `CSG.sphere()` can return a smooth vertex normal, but `normal`
+ * is not used anywhere else.
+ */ parcelHelpers.export(exports, "Vertex", ()=>Vertex);
+var _vector = require("./Vector");
+class Vertex {
+    constructor(pos, normal, uv, color){
+        this.pos = new (0, _vector.Vector)().copy(pos);
+        this.normal = new (0, _vector.Vector)().copy(normal);
+        this.uv = new (0, _vector.Vector)().copy(uv);
+        this.uv.z = 0;
+        color && (this.color = new (0, _vector.Vector)().copy(color));
+    }
+    clone() {
+        return new Vertex(this.pos, this.normal, this.uv, this.color);
+    }
+    // Invert all orientation-specific data (e.g. vertex normal). Called when the
+    // orientation of a polygon is flipped.
+    flip() {
+        this.normal.negate();
+    }
+    // Create a new vertex between this vertex and `other` by linearly
+    // interpolating all properties using a parameter of `t`. Subclasses should
+    // override this to interpolate additional properties.
+    interpolate(other, t) {
+        return new Vertex(this.pos.clone().lerp(other.pos, t), this.normal.clone().lerp(other.normal, t), this.uv.clone().lerp(other.uv, t), this.color && other.color && this.color.clone().lerp(other.color, t));
+    }
+}
+
+},{"./Vector":"405kh","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["ktU33","dnnhU"], "dnnhU", "parcelRequireacdf", {}, "./", "/")
 
 //# sourceMappingURL=reinforcedConcrete.18dafa73.js.map

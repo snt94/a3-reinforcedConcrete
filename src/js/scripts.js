@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { CSG } from 'three-csg-ts';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -24,9 +26,6 @@ scene.add(light);
 const textureLoader = new THREE.TextureLoader();
 const concreteTextureImg = new URL('../assets/concreto_textura.jpg', import.meta.url).href;
 const concreteTexture = textureLoader.load(concreteTextureImg);
-
-let isWireframe = false;
-
 const material = new THREE.MeshBasicMaterial({
   map: concreteTexture,
   color: 0xffffff
@@ -35,32 +34,11 @@ const material = new THREE.MeshBasicMaterial({
 const concreteGeometry = new THREE.BoxGeometry(2, 1, 1);
 const concreteMesh = new THREE.Mesh(concreteGeometry, material);
 
-const holeGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1.2, 32);
-const hole1 = new THREE.Mesh(holeGeometry);
-hole1.position.set(-0.7, 0, -0.4);
-hole1.rotation.z = Math.PI / 2;
+scene.add(concreteMesh);
 
-const hole2 = hole1.clone();
-hole2.position.z = 0.4;
+const originalColor = new THREE.Color().copy(concreteMesh.material.color);
 
-const hole3 = hole1.clone();
-hole3.position.x = 0.7;
-hole3.position.z = -0.4;
-
-const hole4 = hole1.clone();
-hole4.position.z = 0.4;
-
-let resultMesh = CSG.subtract(concreteMesh, hole1);
-resultMesh = CSG.subtract(resultMesh, hole2);
-resultMesh = CSG.subtract(resultMesh, hole3);
-resultMesh = CSG.subtract(resultMesh, hole4);
-
-scene.add(resultMesh);
-resultMesh.material = material;
-
-const originalColor = new THREE.Color().copy(resultMesh.material.color);
-
-controls.target.copy(resultMesh.position);
+controls.target.copy(concreteMesh.position);
 camera.position.z = 5;
 
 const armatureMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
@@ -85,28 +63,78 @@ armatureGroup.visible = false;
 scene.add(armatureGroup);
 
 const stirrupGroup = new THREE.Group();
-const stirrupCount = 6;
-const stirrupWidth = 1.4;
-const stirrupHeight = 0.8;
-const stirrupDepth = 0.6;
-const stirrupMaterial = new THREE.LineBasicMaterial({ color: 0x303030 });
+const stirrupCount = 2;
+const stirrupWidth = 1.525;
+const stirrupDepth = 0.925;
+const stirrupMaterial = new LineMaterial({
+  color: 0x6391AD,
+  linewidth: 0.0125,
+  worldUnits: true,
+});
+
+// Função para gerar os pontos com cantos arredondados
+function createRoundedStirrupPoints(width, depth, y, radius = 0.05, segments = 5) {
+  const points = [];
+  const halfW = width / 2;
+  const halfD = depth / 2;
+
+  const corners = [
+    [-halfW + radius, -halfD + radius], // Inferior esquerdo
+    [halfW - radius, -halfD + radius],  // Inferior direito
+    [halfW - radius, halfD - radius],   // Superior direito
+    [-halfW + radius, halfD - radius]   // Superior esquerdo
+  ];
+
+  const angles = [
+    [Math.PI, 1.5 * Math.PI],     // canto inferior esquerdo
+    [1.5 * Math.PI, 2 * Math.PI], // canto inferior direito
+    [0, 0.5 * Math.PI],           // canto superior direito
+    [0.5 * Math.PI, Math.PI]      // canto superior esquerdo
+  ];
+
+  for (let i = 0; i < 4; i++) {
+    const [startAngle, endAngle] = angles[i];
+    const [cx, cz] = corners[i];
+
+    for (let j = 0; j <= segments; j++) {
+      const t = j / segments;
+      const angle = startAngle + t * (endAngle - startAngle);
+      const x = cx + radius * Math.cos(angle);
+      const z = cz + radius * Math.sin(angle);
+      points.push(x, y, z);
+    }
+  }
+
+  // Fecha o loop
+  points.push(points[0], points[1], points[2]);
+
+  return points;
+}
 
 for (let i = 0; i < stirrupCount; i++) {
   const y = -0.45 + (i / (stirrupCount - 1)) * 0.9;
 
-  const stirrupShape = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-stirrupWidth / 2, y, -stirrupDepth / 2),
-    new THREE.Vector3(stirrupWidth / 2, y, -stirrupDepth / 2),
-    new THREE.Vector3(stirrupWidth / 2, y, stirrupDepth / 2),
-    new THREE.Vector3(-stirrupWidth / 2, y, stirrupDepth / 2),
-  ]);
+  const points = createRoundedStirrupPoints(stirrupWidth, stirrupDepth, y, 0.05, 6);
 
-  const stirrupLine = new THREE.LineLoop(stirrupShape, stirrupMaterial);
+  const stirrupGeometry = new LineGeometry();
+  stirrupGeometry.setPositions(points);
+
+  const stirrupLine = new Line2(stirrupGeometry, stirrupMaterial);
+  stirrupLine.computeLineDistances();
   stirrupGroup.add(stirrupLine);
 }
 
 stirrupGroup.visible = false;
 scene.add(stirrupGroup);
+
+// Wireframe separado do bloco
+const wireframeGeometry = new THREE.WireframeGeometry(concreteGeometry);
+const wireframeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+const concreteWireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+let isWireframe = false;
+concreteWireframe.visible = false;
+
+scene.add(concreteWireframe);
 
 function animate() {
   controls.target.set(0, 0, 0);
@@ -115,17 +143,17 @@ function animate() {
 }
 renderer.setAnimationLoop(animate);
 
-const slider = document.getElementById('damageSlider');
+const dmgSlider = document.getElementById('damageSlider');
 const rustSlider = document.getElementById('rustSlider');
 const carbonSlider = document.getElementById('carbonSlider');
 const toggleBtn = document.getElementById('toggleStructure');
 const resetBtn = document.getElementById('resetVisuals');
 
-slider.addEventListener('input', () => {
-  const value = slider.value;
+dmgSlider.addEventListener('input', () => {
+  const value = dmgSlider.value;
   const rustIntensity = value / 100;
   const darkness = 1 - rustIntensity;
-  resultMesh.material.color.setRGB(
+  concreteMesh.material.color.setRGB(
     1 * darkness,
     1 * darkness,
     1 * darkness
@@ -156,7 +184,7 @@ rustSlider.addEventListener('input', () => {
 carbonSlider.addEventListener('input', () => {
   const intensity = carbonSlider.value / 100;
   const lightening = 1 - 0.5 * intensity;
-  resultMesh.material.color.setRGB(
+  concreteMesh.material.color.setRGB(
     1 * lightening,
     1 * lightening,
     1 * lightening
@@ -165,13 +193,14 @@ carbonSlider.addEventListener('input', () => {
 
 toggleBtn.addEventListener('click', () => {
   isWireframe = !isWireframe;
-  resultMesh.material.wireframe = isWireframe;
+  concreteMesh.visible = !isWireframe;
+  concreteWireframe.visible = isWireframe;
   armatureGroup.visible = isWireframe;
   stirrupGroup.visible = isWireframe;
 });
 
 resetBtn.addEventListener('click', () => {
-  resultMesh.material.color.copy(originalColor);
+  concreteMesh.material.color.copy(originalColor);
   armatureGroup.children.forEach(bar => {
     bar.material.color.set(0x808080);
   });

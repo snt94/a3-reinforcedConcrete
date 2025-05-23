@@ -4,9 +4,17 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
-const renderer = new THREE.WebGLRenderer();
+const container = document.getElementById('three-container');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+renderer.setPixelRatio(window.devicePixelRatio);
+container.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -63,7 +71,7 @@ armatureGroup.visible = false;
 scene.add(armatureGroup);
 
 const stirrupGroup = new THREE.Group();
-const stirrupCount = 2;
+const stirrupCount = 3;
 const stirrupWidth = 1.525;
 const stirrupDepth = 0.925;
 const stirrupMaterial = new LineMaterial({
@@ -143,6 +151,7 @@ function animate() {
 }
 renderer.setAnimationLoop(animate);
 
+
 const dmgSlider = document.getElementById('damageSlider');
 const rustSlider = document.getElementById('rustSlider');
 const carbonSlider = document.getElementById('carbonSlider');
@@ -204,5 +213,16 @@ resetBtn.addEventListener('click', () => {
   armatureGroup.children.forEach(bar => {
     bar.material.color.set(0x808080);
   });
-  slider.value = 0;
+  dmgSlider.value = 0;
+  rustSlider.value = 0;
+  carbonSlider.value = 0;
+});
+
+window.addEventListener('resize', () => {
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  renderer.setSize(width, height);
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
 });

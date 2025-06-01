@@ -19,6 +19,13 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(animate);
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
@@ -44,7 +51,7 @@ const textureLoader = new THREE.TextureLoader();
 const concreteTextureImg = new URL('../assets/concreto_textura.jpg', import.meta.url).href;
 const steelTextureImg = new URL('../assets/aco_textura.jpg', import.meta.url).href;
 const danoTextureImg = new URL('../assets/dano.png', import.meta.url).href;
-const carbonatacaoTextureImg = new URL('../assets/carbonatacao.jpg', import.meta.url).href;
+const carbonatacaoTextureImg = new URL('../assets/carbonatacao.png', import.meta.url).href;
 const ferrugemTextureImg = new URL('../assets/ferrugem.png', import.meta.url).href;
 
 const concreteTexture = textureLoader.load(concreteTextureImg);
@@ -59,6 +66,12 @@ const concreteMaterial = new THREE.MeshStandardMaterial({
   bumpScale: 0.0
 });
 
+const carbonOverlayMaterial = new THREE.MeshStandardMaterial({
+  map: carbonatacaoTexture,
+  transparent: true,
+  opacity: 0,
+});
+
 const concreteGeometry = new THREE.BoxGeometry(2, 1, 1);
 concreteGeometry.computeVertexNormals(); // bgl normal sei la tbm
 const concreteMesh = new THREE.Mesh(concreteGeometry, concreteMaterial);
@@ -68,10 +81,15 @@ scene.add(concreteMesh);
 controls.target.copy(concreteMesh.position);
 camera.position.z = 5;
 
+const carbonOverlayMesh = new THREE.Mesh(concreteGeometry.clone(), carbonOverlayMaterial);
+carbonOverlayMesh.position.copy(concreteMesh.position);
+scene.add(carbonOverlayMesh);
+
 const armatureMaterial = new THREE.MeshStandardMaterial({
   map: steelTexture,
   metalness: 0.8,
   roughness: 0.3,
+  bumpScale: 0
 });
 
 const armatureGroup = new THREE.Group();
@@ -85,7 +103,7 @@ const armaturePositions = [
 armaturePositions.forEach(([x, y, z]) => {
   const armature = new THREE.Mesh(
     new THREE.CylinderGeometry(0.05, 0.05, 1.2),
-    armatureMaterial.clone()
+    armatureMaterial
   );
   armature.position.set(x, y, z);
   armatureGroup.add(armature);
@@ -168,8 +186,8 @@ let isWireframe = false;
 concreteWireframe.visible = false;
 scene.add(concreteWireframe);
 
-// Sliders
 
+// Sliders
 const dmgSlider = document.getElementById('damageSlider');
 const rustSlider = document.getElementById('rustSlider');
 const carbonSlider = document.getElementById('carbonSlider');
@@ -177,11 +195,24 @@ const toggleBtn = document.getElementById('toggleStructure');
 const resetBtn = document.getElementById('resetVisuals');
 
 
-dmgSlider.addEventListener('input', (e) => {
+// debounce
+function debounce(fn, delay) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// Slider dano
+let damageTimeout;
+dmgSlider.addEventListener('input', debounce((e) => {
   const value = parseFloat(e.target.value);
-  concreteMaterial.bumpScale = value * 1.5; // Deixa o dano visível
-  concreteMaterial.needsUpdate = true;
-  
+  clearTimeout(damageTimeout);
+  damageTimeout = setTimeout(() => {
+    concreteMaterial.bumpScale = value * 1.5;
+  }, 30);
+
   armatureGroup.children.forEach(bar => {
     const rustColor = new THREE.Color().lerpColors(
       new THREE.Color(0x808080),
@@ -189,89 +220,96 @@ dmgSlider.addEventListener('input', (e) => {
     );
     bar.material.color = rustColor;
   });
-});
+}));
 
-rustSlider.addEventListener('input', () => {
-  const intensity = rustSlider.value / 100;
+// Slider desgaste de armaduras
+rustSlider.addEventListener('input', (e) => {
+  const intensity = parseFloat(e.target.value); // 0 a 100
+  const t = intensity / 100; // Normaliza de 0 a 1
 
   armatureGroup.children.forEach(bar => {
-    // Mantém a textura base do aço
-    bar.material.map = steelTexture;
+    const material = bar.material;
 
-    // Ajuste gradual de cor com leve avermelhamento
-    const baseColor = new THREE.Color(0x808080);
-    const rustTint = new THREE.Color(0x8B3A3A); // tom enferrujado mais ameno
-    const finalColor = baseColor.clone().lerp(rustTint, intensity);
+    
+    const baseColor = new THREE.Color(0xb0b0b0); // Aço cinza claro
+    const rustColor = new THREE.Color(0x8B0000); // Ferrugem escura
+    const finalColor = baseColor.clone().lerp(rustColor, t);
+    material.color.copy(finalColor);
 
-    bar.material.color = finalColor;
+    
+    material.map = steelTexture;
+    material.map.needsUpdate = true;
 
-    // Aplica a textura de ferrugem como alphaMap se houver intensidade
-    bar.material.alphaMap = intensity > 0 ? ferrugemTexture : null;
-    // bar.material.transparent = intensity > 0;
-    bar.material.needsUpdate = true;
+    
+    material.bumpMap = t > 0 ? ferrugemTexture : null;
+    material.bumpScale = t * 0.15;
+
+    
+    material.roughness = 0.3 + t * 0.5;
+    material.metalness = 0.8 - t * 0.6;
+
+    material.needsUpdate = true;
   });
 });
 
-carbonSlider.addEventListener('input', () => {
+// Slider carbonatação
+carbonSlider.addEventListener('input', debounce(() => {
   const intensity = carbonSlider.value / 100;
+  carbonOverlayMaterial.opacity = intensity * 0.7;
+}, 50));
 
-  // Combina textura de concreto com carbonatação como overlay
-  if (intensity > 0) {
-    concreteMaterial.map = concreteTexture;
-    concreteMaterial.alphaMap = carbonatacaoTexture;
-    concreteMaterial.transparent = true;
-    concreteMaterial.opacity = 1 - 0.3 * intensity; // ajustável
-  } else {
-    concreteMaterial.alphaMap = null;
-    concreteMaterial.transparent = false;
-    concreteMaterial.opacity = 1;
-  }
 
-  concreteMaterial.needsUpdate = true;
-});
-
-//Botões de "Ver Estrutura" e "Resetar"
-
+// Slider Ver Estrutura
 toggleBtn.addEventListener('click', () => {
   isWireframe = !isWireframe;
   concreteMesh.visible = !isWireframe;
   concreteWireframe.visible = isWireframe;
   armatureGroup.visible = isWireframe;
   stirrupGroup.visible = isWireframe;
+  carbonOverlayMesh.visible = !isWireframe;
 });
 
+
+// Slider resetar
 resetBtn.addEventListener('click', () => {
-  // Reset concreto
-  concreteMaterial.map = concreteTexture;
-  concreteMaterial.bumpMap = null;
-  concreteMaterial.alphaMap = null;
-  concreteMaterial.opacity = 1;
-  concreteMaterial.transparent = false;
+  // Reset dano visual no concreto
+  concreteMaterial.bumpScale = 0;
   concreteMaterial.needsUpdate = true;
+
+  // Reset carbonatação
+  carbonOverlayMaterial.opacity = 0;
+  carbonOverlayMaterial.needsUpdate = true;
 
   // Reset armaduras
   armatureGroup.children.forEach(bar => {
-    bar.material.map = steelTexture;
-    bar.material.color.set(0x808080);
-    bar.material.alphaMap = null;
-    bar.material.transparent = false;
-    bar.material.needsUpdate = true;
+    const material = bar.material;
+
+    
+    material.map = steelTexture; // textura base do aço
+    material.color.set(0xb0b0b0); // cinza do aço — essencial se `map` for nulo ou sem cor
+
+    // Reset de textura de ferrugem (bumpMap)
+    material.bumpMap = ferrugemTexture;
+    material.bumpMap.needsUpdate = true;
+
+    material.bumpScale = 0;
+    material.metalness = 0.8;
+    material.roughness = 0.3;
+    material.transparent = false;
+    material.opacity = 1.0;
+
+    material.needsUpdate = true;
   });
 
-  // Reset sliders
+  // Reset sliders para 0
   dmgSlider.value = 0;
   rustSlider.value = 0;
   carbonSlider.value = 0;
+
+  // Dispara os eventos para atualizar a aparência na UI
+  dmgSlider.dispatchEvent(new Event('input'));
+  rustSlider.dispatchEvent(new Event('input'));
+  carbonSlider.dispatchEvent(new Event('input'));
 });
-
-
-
-function animate() {
-  requestAnimationFrame(animate);
-  controls.target.set(0, 0, 0);
-  controls.update();
-  renderer.render(scene, camera);
-}
-renderer.setAnimationLoop(animate);
 
 animate();

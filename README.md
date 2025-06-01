@@ -1,79 +1,84 @@
-# 💥 Simulador de Desgaste em Concreto Armado
+# Reinforced Concrete Visualization
 
-Um website interativo desenvolvido para fins educacionais, onde o usuário pode visualizar um bloco de concreto armado se desgastando com o passar do tempo. A visualização é controlada por um slider, e o bloco pode ser rotacionado com o mouse ou touch, permitindo uma exploração mais intuitiva.
+Este projeto é uma simulação interativa 3D feita com [Three.js](https://threejs.org/), com o objetivo de representar blocos de concreto armado com desgaste visual progressivo. A interface permite visualizar diferentes níveis de dano, ferrugem e carbonatação por meio de controles deslizantes (sliders), além de alternar entre a visualização sólida e a estrutura interna do concreto.
 
-## 🧱 Funcionalidades
+## Objetivo
 
-- Bloco 3D interativo representando concreto armado.
-- Controle de rotação livre com o mouse (Orbit Controls).
-- Slider que simula o desgaste progressivo do material ao longo do tempo.
-- Seção explicativa sobre concreto armado e os impactos da corrosão nas estruturas.
+Desenvolver uma visualização didática e interativa da deterioração do concreto armado, útil para fins educacionais ou como protótipo em aplicações de engenharia civil.
 
-## 💠 Tecnologias Utilizadas
+## Estrutura do Projeto
 
-- [Three.js](https://threejs.org/) – para renderização 3D no navegador.
-- HTML, CSS e JavaScript puro.
-- OrbitControls (Three.js addon) – para rotação da câmera com o mouse.
-- Input range (slider) – controle de tempo/desgaste.
+```
+reinforcedConcrete/
+├── dist/                      # Pasta de build gerada automaticamente
+├── node_modules/             # Dependências do Node.js
+├── src/
+│   ├── assets/               # Texturas utilizadas no modelo 3D
+│   │   ├── aco_textura.jpg
+│   │   ├── carbonatacao.jpg
+│   │   ├── concreto_textura.jpg
+│   │   ├── dano.png
+│   │   └── ferrugem.png
+│   ├── css/
+│   │   └── style.css         # Estilos da aplicação
+│   ├── js/
+│   │   ├── functionalities.js# Lógica de sliders e efeitos visuais
+│   │   └── scripts.js        # Inicialização da cena Three.js
+│   └── index.html            # Estrutura principal da página
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── README.md
+```
 
-## 🚀 Como executar o projeto
+## Como Executar
 
-1. Clone o repositório:
+1. Certifique-se de ter o [Node.js](https://nodejs.org/) instalado.
+2. Clone o repositório:
    ```bash
-   git clone https://github.com/snt94/a3-reinforcedConcrete
-   cd a3-reinforcedConcrete
+   git clone https://github.com/seu-usuario/reinforcedConcrete.git
+   cd reinforcedConcrete
    ```
-
-2. Instale as dependências:
+3. Instale as dependências:
    ```bash
    npm install
    ```
-
-3. Rode o projeto:
+4. Inicie o projeto em modo desenvolvimento:
    ```bash
-   npm run dev
+   npx parcel src/index.html
    ```
 
-4. Ou abra o `index.html` diretamente em seu navegador.
+O projeto estará disponível em `http://localhost:1234/` por padrão.
 
-## 📂 Estrutura do Projeto
+## Funcionalidades
 
-```
-📦 src/
- ┣ 📂 css/
- ┃ ┗ 📄 style.css
- ┣ 📂 js/
- ┃ ┗ 📄 scripts.js
- ┗ 📄 index.html
-📦 dist/              # Gerado automaticamente pelo Parcel (build)
-📦 node_modules/      # Dependências instaladas
-📄 package.json
-📄 package-lock.json
-📄 README.md
-```
+- Visualização 3D de um bloco de concreto armado.
+- Sliders para ajustar:
+  - Dano (profundidade e opacidade)
+  - Ferrugem (intensidade nas armaduras)
+  - Carbonatação (nível visual de contaminação)
+- Alternar estrutura interna (wireframe + estribos e barras).
+- Reset visual para restaurar o modelo original.
 
-## 📚 Sobre o projeto
+## Tecnologias Utilizadas
 
-Este projeto foi idealizado como uma forma de demonstrar visualmente os efeitos da corrosão em estruturas de concreto armado, com foco em tornar o conteúdo mais acessível, interativo e compreensível para estudantes e o público geral.
+- [Three.js](https://threejs.org/)
+- [Parcel](https://parceljs.org/)
+- HTML5, CSS3 e JavaScript (ES6)
 
-## 🧠 Conceitos Envolvidos
+## Texturas
 
-- Concreto armado e corrosão da armadura
-- Interatividade com elementos 3D no navegador
-- Aplicação de texturas e simulação visual de tempo
+As texturas estão localizadas em `src/assets/`, representando:
+- Concreto base
+- Aço das barras
+- Dano superficial
+- Ferrugem
+- Carbonatação
 
-## 📚 Créditos e Referências
+## Status
 
-- [Three.js Documentation](https://threejs.org/docs/)
-- [Poly Haven](https://polyhaven.com) – Texturas públicas e gratuitas
-- Textos técnicos baseados em materiais acadêmicos sobre durabilidade do concreto
+Projeto em desenvolvimento. As funcionalidades principais estão implementadas, e melhorias visuais continuam em andamento.
 
-## 📩 Contato
+## Licença
 
-Se quiser trocar ideias ou sugerir melhorias:
-- ✉️ edu.santos200611@gmail.com
-- 💼 [LinkedIn](https://www.linkedin.com/in/eduardo-luis-de-andrade-santos)
-
----
-
-> Projeto criado com fins educacionais e de apresentação de trabalho acadêmico.
+Este projeto é de uso educacional. Licenciamento formal pode ser definido futuramente.

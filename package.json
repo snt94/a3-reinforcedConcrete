@@ -4,7 +4,7 @@
   "description": "Projeto acadêmico correspondente a última avaliação do primeiro semestre do curso de Engenharia da Computação na Universidade São Judas Tadeu.",
   "homepage": "https://snt94.github.io/a3-reinforcedConcrete",
   "scripts": {
-    "build": "parcel build src/index.html --dist-dir dist",
+    "build": "parcel build src/index.html --dist-dir dist --public-url ./",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

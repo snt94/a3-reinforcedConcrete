@@ -54,8 +54,7 @@ const steelTexture = textureLoader.load(steelTextureImg);
 const danoTexture = textureLoader.load(danoTextureImg);
 const carbonatacaoTexture = textureLoader.load(carbonatacaoTextureImg);
 const ferrugemTexture = textureLoader.load(ferrugemTextureImg);
-ferrugemTexture.wrapS = ferrugemTexture.wrapT = THREE.RepeatWrapping;
-ferrugemTexture.encoding = THREE.sRGBEncoding;
+
 
 const concreteMaterial = new THREE.MeshStandardMaterial({
   map: concreteTexture,

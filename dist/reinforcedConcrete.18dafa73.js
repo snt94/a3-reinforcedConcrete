@@ -715,8 +715,6 @@ const steelTexture = textureLoader.load(steelTextureImg);
 const danoTexture = textureLoader.load(danoTextureImg);
 const carbonatacaoTexture = textureLoader.load(carbonatacaoTextureImg);
 const ferrugemTexture = textureLoader.load(ferrugemTextureImg);
-ferrugemTexture.wrapS = ferrugemTexture.wrapT = _three.RepeatWrapping;
-ferrugemTexture.encoding = _three.sRGBEncoding;
 const concreteMaterial = new _three.MeshStandardMaterial({
     map: concreteTexture,
     bumpMap: danoTexture,
@@ -960,7 +958,7 @@ function animate() {
 }
 animate();
 
-},{"three":"dsoTF","three/examples/jsm/controls/OrbitControls":"45ipX","three/examples/jsm/lines/Line2.js":"7LSZY","three/examples/jsm/lines/LineGeometry.js":"8TjV6","three/examples/jsm/lines/LineMaterial.js":"50Iwc","1db1a8c7af0847f9":"4dkQn","8d1be436034f91db":"gIipK","82c455b22e2ba364":"fdBHZ","5d1b4c706e1793ea":"epdLL","847902a3e1e6f335":"5bxIr"}],"dsoTF":[function(require,module,exports,__globalThis) {
+},{"three":"dsoTF","three/examples/jsm/controls/OrbitControls":"45ipX","three/examples/jsm/lines/Line2.js":"7LSZY","three/examples/jsm/lines/LineGeometry.js":"8TjV6","three/examples/jsm/lines/LineMaterial.js":"50Iwc","1db1a8c7af0847f9":"4dkQn","8d1be436034f91db":"gIipK","82c455b22e2ba364":"fdBHZ","847902a3e1e6f335":"5bxIr","5d1b4c706e1793ea":"epdLL"}],"dsoTF":[function(require,module,exports,__globalThis) {
 /**
  * @license
  * Copyright 2010-2025 Three.js Authors
@@ -53516,11 +53514,11 @@ module.exports = module.bundle.resolve("aco_textura.a9d55f5d.jpg") + "?" + Date.
 },{}],"fdBHZ":[function(require,module,exports,__globalThis) {
 module.exports = module.bundle.resolve("dano.c4325b8d.png") + "?" + Date.now();
 
-},{}],"epdLL":[function(require,module,exports,__globalThis) {
-module.exports = module.bundle.resolve("ferrugem.b72e26f9.png") + "?" + Date.now();
-
 },{}],"5bxIr":[function(require,module,exports,__globalThis) {
 module.exports = module.bundle.resolve("carbonatacao.d996cf32.png") + "?" + Date.now();
+
+},{}],"epdLL":[function(require,module,exports,__globalThis) {
+module.exports = module.bundle.resolve("ferrugem.b72e26f9.png") + "?" + Date.now();
 
 },{}]},["ktU33","dnnhU"], "dnnhU", "parcelRequireacdf", {}, "./", "/")
 

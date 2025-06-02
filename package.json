@@ -2,9 +2,10 @@
   "name": "reinforcedconcrete",
   "version": "1.0.0",
   "description": "Projeto acadêmico correspondente a última avaliação do primeiro semestre do curso de Engenharia da Computação na Universidade São Judas Tadeu.",
+  "homepage": "https://snt94.github.io/a3-reinforcedConcrete",
   "scripts": {
-    "start": "parcel src/index.html",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/index.html --dist-dir dist",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
   "repository": {

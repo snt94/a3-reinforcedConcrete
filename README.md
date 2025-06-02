@@ -11,20 +11,20 @@ Desenvolver uma visualização didática e interativa da deterioração do concr
 ```
 reinforcedConcrete/
 ├── dist/                      # Pasta de build gerada automaticamente
-├── node_modules/             # Dependências do Node.js
+├── node_modules/              # Dependências do Node.js
 ├── src/
-│   ├── assets/               # Texturas utilizadas no modelo 3D
+│   ├── assets/                # Texturas utilizadas no modelo 3D
 │   │   ├── aco_textura.jpg
 │   │   ├── carbonatacao.jpg
 │   │   ├── concreto_textura.jpg
 │   │   ├── dano.png
 │   │   └── ferrugem.png
 │   ├── css/
-│   │   └── style.css         # Estilos da aplicação
+│   │   └── style.css          # Estilos da aplicação
 │   ├── js/
-│   │   ├── functionalities.js# Lógica de sliders e efeitos visuais
-│   │   └── scripts.js        # Inicialização da cena Three.js
-│   └── index.html            # Estrutura principal da página
+│   │   ├── functionalities.js # Tema claro e escuro
+│   │   └── scripts.js         # Inicialização da cena Three.js
+│   └── index.html             # Estrutura principal da página
 ├── .gitignore
 ├── package.json
 ├── package-lock.json
@@ -36,7 +36,7 @@ reinforcedConcrete/
 1. Certifique-se de ter o [Node.js](https://nodejs.org/) instalado.
 2. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/reinforcedConcrete.git
+   git clone https://github.com/snt94/a3-reinforcedConcrete.git
    cd reinforcedConcrete
    ```
 3. Instale as dependências:
@@ -45,7 +45,7 @@ reinforcedConcrete/
    ```
 4. Inicie o projeto em modo desenvolvimento:
    ```bash
-   npx parcel src/index.html
+   npx parcel ./src/index.html
    ```
 
 O projeto estará disponível em `http://localhost:1234/` por padrão.
@@ -77,7 +77,9 @@ As texturas estão localizadas em `src/assets/`, representando:
 
 ## Status
 
-Projeto em desenvolvimento. As funcionalidades principais estão implementadas, e melhorias visuais continuam em andamento.
+Projeto base finalizado. 
+ - Atualizações futuras serão relacionadas a otimização, refatoração do código e implementação de funcionalidade de ferrugem similar ao 'dano' do concreto.
+ - Sugestões de novas funcionalidades? Mande em meu [email](eduuartss@gmail.com).
 
 ## Licença
 

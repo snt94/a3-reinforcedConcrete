@@ -5,9 +5,14 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
 const container = document.getElementById('three-container');
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = false;
+
+const maxPixelRatio = 1.0;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
 container.appendChild(renderer.domElement);
 
 window.addEventListener('resize', () => {
@@ -18,13 +23,6 @@ window.addEventListener('resize', () => {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
 });
-
-function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
-}
-renderer.setAnimationLoop(animate);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -37,15 +35,12 @@ controls.maxPolarAngle = Math.PI / 2;
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
-
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
 directionalLight.position.set(5, 10, 7.5);
 scene.add(directionalLight);
 
-
-//Carregamento de Texturas
 const textureLoader = new THREE.TextureLoader();
 
 const concreteTextureImg = new URL('../assets/concreto_textura.jpg', import.meta.url).href;
@@ -59,21 +54,17 @@ const steelTexture = textureLoader.load(steelTextureImg);
 const danoTexture = textureLoader.load(danoTextureImg);
 const carbonatacaoTexture = textureLoader.load(carbonatacaoTextureImg);
 const ferrugemTexture = textureLoader.load(ferrugemTextureImg);
+ferrugemTexture.wrapS = ferrugemTexture.wrapT = THREE.RepeatWrapping;
+ferrugemTexture.encoding = THREE.sRGBEncoding;
 
 const concreteMaterial = new THREE.MeshStandardMaterial({
   map: concreteTexture,
   bumpMap: danoTexture,
   bumpScale: 0.0
 });
-
-const carbonOverlayMaterial = new THREE.MeshStandardMaterial({
-  map: carbonatacaoTexture,
-  transparent: true,
-  opacity: 0,
-});
-
 const concreteGeometry = new THREE.BoxGeometry(2, 1, 1);
-concreteGeometry.computeVertexNormals(); // bgl normal sei la tbm
+concreteGeometry.computeVertexNormals();
+
 const concreteMesh = new THREE.Mesh(concreteGeometry, concreteMaterial);
 
 scene.add(concreteMesh);
@@ -81,12 +72,19 @@ scene.add(concreteMesh);
 controls.target.copy(concreteMesh.position);
 camera.position.z = 5;
 
+const carbonOverlayMaterial = new THREE.MeshStandardMaterial({
+  map: carbonatacaoTexture,
+  transparent: true,
+  opacity: 0,
+});
+
 const carbonOverlayMesh = new THREE.Mesh(concreteGeometry.clone(), carbonOverlayMaterial);
 carbonOverlayMesh.position.copy(concreteMesh.position);
 scene.add(carbonOverlayMesh);
 
 const armatureMaterial = new THREE.MeshStandardMaterial({
   map: steelTexture,
+  bumpMap: ferrugemTexture,
   metalness: 0.8,
   roughness: 0.3,
   bumpScale: 0
@@ -195,7 +193,7 @@ const toggleBtn = document.getElementById('toggleStructure');
 const resetBtn = document.getElementById('resetVisuals');
 
 
-// debounce
+// debounce pra melhor performance em geral
 function debounce(fn, delay) {
   let timeout;
   return (...args) => {
@@ -208,45 +206,48 @@ function debounce(fn, delay) {
 let damageTimeout;
 dmgSlider.addEventListener('input', debounce((e) => {
   const value = parseFloat(e.target.value);
+
   clearTimeout(damageTimeout);
   damageTimeout = setTimeout(() => {
     concreteMaterial.bumpScale = value * 1.5;
   }, 30);
-
-  armatureGroup.children.forEach(bar => {
-    const rustColor = new THREE.Color().lerpColors(
-      new THREE.Color(0x808080),
-      new THREE.Color(0x8B0000),
-    );
-    bar.material.color = rustColor;
-  });
 }));
 
-// Slider desgaste de armaduras
+
+
+// Slider Ferrugem
+let targetRust = 0;
+let currentRust = 0;
+
 rustSlider.addEventListener('input', (e) => {
-  const intensity = parseFloat(e.target.value); // 0 a 100
-  const t = intensity / 100; // Normaliza de 0 a 1
+  targetRust = parseFloat(e.target.value) / 100;
+  currentRust = THREE.MathUtils.lerp(currentRust, targetRust, 0.05);
+  const lerpSpeed = 0.05;
+  currentRust += (targetRust - currentRust) * lerpSpeed;
 
   armatureGroup.children.forEach(bar => {
     const material = bar.material;
 
-    
-    const baseColor = new THREE.Color(0xb0b0b0); // Aço cinza claro
-    const rustColor = new THREE.Color(0x8B0000); // Ferrugem escura
-    const finalColor = baseColor.clone().lerp(rustColor, t);
-    material.color.copy(finalColor);
+    if (currentRust > 0.001) {
+      material.map = steelTexture;
+      material.bumpMap = ferrugemTexture;
+      material.bumpScale = currentRust * 0.05;
 
-    
-    material.map = steelTexture;
-    material.map.needsUpdate = true;
+      const rustColor = new THREE.Color(0x8B4513);
+      const baseColor = new THREE.Color(0xb0b0b0);
+      const blendedColor = baseColor.clone().lerp(rustColor, currentRust);
+      material.color.copy(blendedColor);
 
-    
-    material.bumpMap = t > 0 ? ferrugemTexture : null;
-    material.bumpScale = t * 0.15;
-
-    
-    material.roughness = 0.3 + t * 0.5;
-    material.metalness = 0.8 - t * 0.6;
+      material.roughness = 0.4 + currentRust * 0.3;
+      material.metalness = 0.7 - currentRust * 0.5;
+    } else {
+      material.map = steelTexture;
+      material.bumpMap = null;
+      material.color.set(0xb0b0b0);
+      material.bumpScale = 0;
+      material.roughness = 0.4;
+      material.metalness = 0.7;
+    }
 
     material.needsUpdate = true;
   });
@@ -258,8 +259,7 @@ carbonSlider.addEventListener('input', debounce(() => {
   carbonOverlayMaterial.opacity = intensity * 0.7;
 }, 50));
 
-
-// Slider Ver Estrutura
+// Slider 'Ver Estrutura'
 toggleBtn.addEventListener('click', () => {
   isWireframe = !isWireframe;
   concreteMesh.visible = !isWireframe;
@@ -269,47 +269,41 @@ toggleBtn.addEventListener('click', () => {
   carbonOverlayMesh.visible = !isWireframe;
 });
 
-
-// Slider resetar
+// Slider 'resetar'
 resetBtn.addEventListener('click', () => {
-  // Reset dano visual no concreto
   concreteMaterial.bumpScale = 0;
   concreteMaterial.needsUpdate = true;
 
-  // Reset carbonatação
   carbonOverlayMaterial.opacity = 0;
   carbonOverlayMaterial.needsUpdate = true;
 
-  // Reset armaduras
   armatureGroup.children.forEach(bar => {
     const material = bar.material;
-
-    
-    material.map = steelTexture; // textura base do aço
-    material.color.set(0xb0b0b0); // cinza do aço — essencial se `map` for nulo ou sem cor
-
-    // Reset de textura de ferrugem (bumpMap)
-    material.bumpMap = ferrugemTexture;
-    material.bumpMap.needsUpdate = true;
-
+    material.map = steelTexture;
+    material.bumpMap = null;
     material.bumpScale = 0;
-    material.metalness = 0.8;
-    material.roughness = 0.3;
-    material.transparent = false;
-    material.opacity = 1.0;
-
+    material.color.set(0xb0b0b0);
+    material.roughness = 0.4;
+    material.metalness = 0.7;
     material.needsUpdate = true;
+    targetRust = 0;
+    currentRust = 0;
   });
 
-  // Reset sliders para 0
   dmgSlider.value = 0;
   rustSlider.value = 0;
   carbonSlider.value = 0;
 
-  // Dispara os eventos para atualizar a aparência na UI
   dmgSlider.dispatchEvent(new Event('input'));
   rustSlider.dispatchEvent(new Event('input'));
   carbonSlider.dispatchEvent(new Event('input'));
 });
+
+// Animação
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
 
 animate();

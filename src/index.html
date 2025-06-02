@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,8 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
 
+
 <body>
     <button class="toggle-theme-btn" id="themeToggleBtn" aria-label="Alternar tema">🌗</button>
+
 
     <main>
         <section id="introducao-concreto">
@@ -24,6 +27,7 @@
             </p>
         </section>
 
+
         <section id="vantagens-concreto">
             <h2>Vantagens do Concreto Armado</h2>
             <ul>
@@ -35,6 +39,7 @@
             </ul>
         </section>
 
+
         <section id="desvantagens-concreto">
             <h2>Desvantagens do Concreto Armado</h2>
             <ul>
@@ -45,8 +50,11 @@
             </ul>
         </section>
 
-        <section id="degradacoes-concreto">
-            <h2>Principais Tipos de Degradação</h2>
+
+
+
+        <section id="fatores-concreto">
+            <h2>Principais Fatores de Degradação</h2>
             <ul>
                 <li><strong>Corrosão das Armaduras:</strong> causada pela penetração de agentes agressivos como cloretos
                     e CO₂.</li>
@@ -55,8 +63,11 @@
                     corrosão.</li>
                 <li><strong>Reações Álcalis-Agregado:</strong> interações químicas que provocam expansão e fissuras.
                 </li>
+                <li><strong>Penetração de Cloretos:</strong> Os cloretos podem entrar no concreto através de ambientes marinhos ou "de-icing salts" &lpar;Explicar aqui&rpar;. Esses íons aceleram a corrosão das armaduras de aço, causando fissuras e falhas estruturais.</li>
+                <li><strong>Ataque Químico:</strong> Substâncias químicas agressivas, como ácidos e sulfatos, podem atacar o concreto, degradando sua matriz e enfraquecendo a estrutura.</li>
             </ul>
         </section>
+
 
         <section id="importancia-manutencao">
             <h2>Importância da Manutenção Preventiva</h2>
@@ -67,35 +78,56 @@
             </p>
         </section>
 
+
         <section class="controls-section" aria-label="Controles de visualização">
             <fieldset class="controls">
                 <legend>Visualização Interativa</legend>
 
+
                 <label for="damageSlider">Dano</label>
                 <input type="range" id="damageSlider" min="0" max="100" value="0" />
+
 
                 <label for="rustSlider">Ferrugem</label>
                 <input type="range" id="rustSlider" min="0" max="100" value="0" />
 
+
                 <label for="carbonSlider">Carbonatação</label>
                 <input type="range" id="carbonSlider" min="0" max="100" value="0" />
+
 
                 <button id="toggleStructure">Ver Estrutura</button>
                 <button id="resetVisuals">Resetar</button>
             </fieldset>
         </section>
 
+
         <div id="three-container">
             <canvas id="three-canvas"></canvas>
         </div>
     </main>
 
-    <footer style="text-align: center; padding: 20px; font-size: 0.9em; color: #999;">
-        Projeto A3 - Concreto Armado · Engenharia da Computação · 2025
+
+    <footer style="text-align: center; padding: 20px; font-size: 0.9em;">
+        <div>
+        Projeto A3 - Concreto Armado · Engenharia da Computação · Engenharia Civil · 2025
+       
+        <h4>Integrantes</h4>
+        <ul>
+            <li><a>Daniel Trindade Lousão</a></li>
+            <li><a href="https://www.linkedin.com/in/eduardo-luis-de-andrade-santos/" target="_blank">Eduardo Luís de Andrade Santos</a></li>
+            <li><a>Gustavo Jesus de Santos Lima</a></li>
+            <li><a>João Victor Soares</a></li>
+            <li><a href="https://www.linkedin.com/in/pietro-furlan-879244367/" target="_blank">Pietro Enrico Furlan</a></li>
+        </ul>
+        </div>
     </footer>
+
 
     <script src="./js/functionalities.js" type="module"></script>
     <script src="./js/scripts.js" type="module"></script>
 </body>
 
+
 </html>
+

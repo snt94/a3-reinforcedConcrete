@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Projeto acadêmico correspondente a última avaliação do primeiro semestre do curso de Engenharia da Computação na Universidade São Judas Tadeu.",
   "scripts": {
-    "test": "teste"
+    "test": "teste",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+
   },
   "repository": {
     "type": "git",
@@ -18,6 +21,6 @@
   "dependencies": {
     "parcel": "2.14.4",
     "three": "^0.176.0",
-  "three-csg-ts": "^3.2.0"
+    "three-csg-ts": "^3.2.0"
   }
 }

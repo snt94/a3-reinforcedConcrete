@@ -2,7 +2,7 @@
   "name": "reinforcedconcrete",
   "version": "1.0.0",
   "description": "Projeto acadêmico correspondente a última avaliação do primeiro semestre do curso de Engenharia da Computação na Universidade São Judas Tadeu.",
-  "homepage": "https://snt94.github.io/a3-reinforcedConcrete",
+  "homepage": "https://snt94.github.io/visualizer-reinforcedConcrete",
   "scripts": {
     "build": "parcel build src/index.html --public-url ./",
     "predeploy": "npm run build",
@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/snt94/a3-reinforcedConcrete.git"
+    "url": "git+https://github.com/snt94/visualizer-reinforcedConcrete.git"
   },
   "author": "Eduardo Luis de Andrade Santos",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/snt94/a3-reinforcedConcrete/issues"
+    "url": "https://github.com/snt94/visualizer-reinforcedConcrete/issues"
   },
   "dependencies": {
     "parcel": "2.14.4",

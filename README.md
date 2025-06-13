@@ -36,8 +36,8 @@ reinforcedConcrete/
 1. Certifique-se de ter o [Node.js](https://nodejs.org/) instalado.
 2. Clone o repositório:
    ```bash
-   git clone https://github.com/snt94/a3-reinforcedConcrete.git
-   cd reinforcedConcrete
+   git clone https://github.com/snt94/visualizer-reinforcedConcrete.git
+   cd visualizer-reinforcedConcrete
    ```
 3. Instale as dependências:
    ```bash
@@ -45,7 +45,7 @@ reinforcedConcrete/
    ```
 4. Inicie o projeto em modo desenvolvimento:
    ```bash
-   npx parcel ./src/index.html
+   npx parcel /src/index.html
    ```
 
 O projeto estará disponível em `http://localhost:1234/` por padrão.
